@@ -1,12 +1,36 @@
 import unittest.mock
 
 import smsfarm
+import tests.helpers
+
 from smsfarm.exceptions import NotSpecifiedError
 
 
 class TestClient(unittest.TestCase):
     def setUp(self):
         self.client = smsfarm.Client("", "")
+
+    def test_recipients_exception(self):
+        with self.assertRaises(ValueError):
+            self.client.recipients = 123
+
+    def test_one_recipient_with_list(self):
+        self.client.recipients = ["900123456"]
+        self.assertEqual(self.client.recipients, "900123456")
+
+    def test_multiple_recipients_with_list(self):
+        self.client.recipients = ["900123456", '900654321']
+        recipients = self.client.recipients
+        self.assertEqual(recipients, "900123456,900654321")
+
+    def test_one_recipient_with_string(self):
+        self.client.recipients = "900123456"
+        self.assertEqual(self.client.recipients, "900123456")
+
+    def test_verify_if_set_properly(self):
+        self.assertEqual(self.client.sender, tests.helpers.get_hostname())
+        client = smsfarm.Client("", "", sender='smsfarm-sender')
+        self.assertEqual(client.sender, "smsfarm-sender")
 
     # just for coverage completion
     @unittest.mock.patch('smsfarm.Client._Client__get_credit')
@@ -37,7 +61,7 @@ class TestClient(unittest.TestCase):
             self.client.get_message_status("12345678")
 
     @unittest.mock.patch('smsfarm.Client._Client__get_message_status')
-    def test_get_message_status_without_specifying_recipient(self, mocked_response):
+    def test_get_message_status_without_recipient(self, mocked_response):
         mocked_response.return_value = "DELIVERED"
         self.client.recipients = ["421900123456"]
         status = self.client.get_message_status("123456")

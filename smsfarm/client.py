@@ -21,8 +21,8 @@ class Client(object):
                     is used a hostname of machine.
         """
         self.__recipients = []
-        self.__code = integration_code
-        self.__id = integration_id
+        self.__integration_code = integration_code
+        self.__integration_id = integration_id
         if not sender:
             self.__sender = os.uname()[1]
         else:
@@ -37,6 +37,10 @@ class Client(object):
         md5_sum = hashlib.md5(raw_string).hexdigest()
         signature = md5_sum[10:21]
         return signature
+
+    @property
+    def sender(self):
+        return self.__sender
 
     @property
     def recipients(self):
@@ -212,46 +216,51 @@ class Client(object):
             return result
 
     def __get_credit(self):
-        signature = self.__generate_signature(self.__code, self.__id)
+        signature = self.__generate_signature(self.__integration_code,
+                                              self.__integration_id)
 
         # integration_id, signature
-        return self.__service.GetCreditAmount(self.__id, signature)
+        return self.__service.GetCreditAmount(self.__integration_id,
+                                              signature)
 
     def __send_message(self, message):
-        signature = self.__generate_signature(self.__code, self.recipients)
+        signature = self.__generate_signature(self.__integration_code,
+                                              self.recipients)
 
         # sender, recipients, message, integration_id, signature
         return self.__service.SendMessage(
             self.__sender,
             self.recipients,
             message,
-            self.__id,
+            self.__integration_id,
             signature)
 
     def __get_all_message_statuses(self, request_id):
-        signature = self.__generate_signature(self.__code, request_id)
+        signature = self.__generate_signature(self.__integration_code,
+                                              request_id)
 
         # integration_id, request_id, signature
-        return self.__service.GetAllMessageStatuses(self.__id,
+        return self.__service.GetAllMessageStatuses(self.__integration_id,
                                                     request_id,
                                                     signature)
 
     def __get_message_status(self, request_id, recipient):
-        signature = self.__generate_signature(self.__code, request_id)
+        signature = self.__generate_signature(self.__integration_code,
+                                              request_id)
 
         # request_id, recipient, integration_id, signature
         return self.__service.GetMessageStatus(request_id,
                                                recipient,
-                                               self.__id,
+                                               self.__integration_id,
                                                signature)
 
     def __send_scheduled_message(self, message, send_time, recipient):
-        signature = self.__generate_signature(self.__code, recipient)
+        signature = self.__generate_signature(self.__integration_code, recipient)
 
         # sender, recipient, message, send_time, integration_id, signature
         return self.__service.SendScheduledMessage(self.__sender,
                                                    recipient,
                                                    message,
                                                    send_time,
-                                                   self.__id,
+                                                   self.__integration_id,
                                                    signature)

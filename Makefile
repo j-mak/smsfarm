@@ -6,12 +6,12 @@ install:
 freeze:
 	pip freeze | grep -v "pkg-resources" > requirements.txt
 
-tests: unittests pep8 pylint
+tests-all: tests pep8 pylint
 
-unittests:
+test:
 	$(PYTHON) -m unittest tests/test_*
 
-unittests_verbose:
+test-verbose:
 	$(PYTHON) -m unittest -v tests/test_*
 
 pep8:
