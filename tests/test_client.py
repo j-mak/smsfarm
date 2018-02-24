@@ -1,14 +1,13 @@
 import unittest.mock
 
 import smsfarm
+import smsfarm.core
 import tests.helpers
-
-from smsfarm.exceptions import NotSpecifiedError
 
 
 class TestClient(unittest.TestCase):
     def setUp(self):
-        self.client = smsfarm.Client("", "")
+        self.client = smsfarm.Client("some-code", "some-id")
 
     def test_recipients_exception(self):
         with self.assertRaises(ValueError):
@@ -29,27 +28,34 @@ class TestClient(unittest.TestCase):
 
     def test_verify_if_set_properly(self):
         self.assertEqual(self.client.sender, tests.helpers.get_hostname())
-        client = smsfarm.Client("", "", sender='smsfarm-sender')
+        client = smsfarm.Client("some-code", "some-id", sender='smsfarm-sender')
         self.assertEqual(client.sender, "smsfarm-sender")
 
     # just for coverage completion
     @unittest.mock.patch('smsfarm.Client._Client__get_credit')
     def test_get_credit(self, mocked):
-        mocked.return_value = 9.23
-        self.assertEqual(self.client.get_credit(), 9.23)
+        mocked.return_value = smsfarm.ApiResponse()
+        mocked.return_value.data = 9.23
+        response = self.client.get_credit()
+        self.assertEqual(response.data, 9.23)
 
     @unittest.mock.patch('smsfarm.Client._Client__send_message')
     def test_send_message(self, mocked):
-        mocked.return_value = "2410290"
-        self.assertEqual(self.client.send_message("hello world!"), '2410290')
+        mocked.return_value = smsfarm.ApiResponse()
+        mocked.return_value.data = 2410290
+        self.client.recipients = "900123456"
+
+        response = self.client.send_message("hello world!")
+        self.assertEqual(response.data, '2410290')
 
     @unittest.mock.patch('smsfarm.Client._Client__get_all_message_statuses')
     def test_all_message_statuses(self, mocked):
-        mocked.return_value = ['421900123456:MESSAGE-EXPIRED',
-                               '421900654321:DELIVERED']
+        mocked.return_value = smsfarm.ApiResponse()
+        mocked.return_value.data = ['421900123456:MESSAGE-EXPIRED',
+                                    '421900654321:DELIVERED']
         resp = self.client.get_all_message_statuses('12312312')
-        self.assertEqual(resp, {'421900654321': 'DELIVERED',
-                                '421900123456': 'MESSAGE-EXPIRED'})
+        self.assertEqual(resp.data, {'421900654321': 'DELIVERED',
+                                     '421900123456': 'MESSAGE-EXPIRED'})
 
     def test_try_send_empty_message(self):
         with self.assertRaises(ValueError):
@@ -57,18 +63,20 @@ class TestClient(unittest.TestCase):
 
     def test_get_message_status_with_multiple_recipients(self):
         self.client.recipients = ["421900123456", "421900654321"]
-        with self.assertRaises(NotSpecifiedError):
+        with self.assertRaises(ValueError):
             self.client.get_message_status("12345678")
 
     @unittest.mock.patch('smsfarm.Client._Client__get_message_status')
     def test_get_message_status_without_recipient(self, mocked_response):
-        mocked_response.return_value = "DELIVERED"
+        mocked_response.return_value = smsfarm.ApiResponse()
+        mocked_response.return_value.data = "DELIVERED"
         self.client.recipients = ["421900123456"]
-        status = self.client.get_message_status("123456")
-        self.assertEqual(status, "DELIVERED")
+        response = self.client.get_message_status("123456")
+        self.assertEqual(response.data, "DELIVERED")
 
     @unittest.mock.patch('smsfarm.Client._Client__get_message_status')
     def test_get_message_status_with_recipient(self, mocked_response):
-        mocked_response.return_value = "DELIVERED"
-        status = self.client.get_message_status("123456", "421900123456")
-        self.assertEqual(status, "DELIVERED")
+        mocked_response.return_value = smsfarm.ApiResponse()
+        mocked_response.return_value.data = "DELIVERED"
+        response = self.client.get_message_status("123456", "421900123456")
+        self.assertEqual(response.data, "DELIVERED")

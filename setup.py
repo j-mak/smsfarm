@@ -9,6 +9,7 @@ setup(
     author='Jozef "sunny" Mak',
     author_email='sunny@jozefmak.eu',
     description='Python client for smsfarm.sk',
+    long_description='',
     keywords=[
         'smsfarm'
     ],
