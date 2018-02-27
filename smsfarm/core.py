@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import os
 
@@ -22,6 +23,7 @@ class ApiResponse(object):
             Contain error message, if is error occurred during
             SOAP operation.
     """
+
     def __init__(self):
         self.data = None
         self.error = None
@@ -57,6 +59,7 @@ class Client(object):
     """
     Implementation of Client class.
     """
+
     def __init__(self, integration_code, integration_id, sender=None):
         """
         Implementation of API client for smsfarm.sk.
@@ -216,12 +219,35 @@ class Client(object):
         response = self.__get_message_status(request_id, recipient, signature)
         return response
 
-    def send_scheduled_message(self, message, send_time, recipient=None):
-        # format: "send_time" => date("Y-m-d H:i")
-        raise NotImplementedError("Not implemented")
-        # signature = self.__generate_signature(self.__integration_code, recipient)
-        # response = self.__send_scheduled_message(message, send_time, recipient, signature)
-        # return response
+    def send_scheduled_message(self, message: str,
+                               send_time: str) -> ApiResponse:
+        """
+        Send message at specified time.
+
+        Args:
+            message:
+                String content of message which you want to send.
+            send_time:
+                String representation of specified time. Must be in
+                "%Y-%m-%d %H:%M" format, for example (2018-01-01 12:29).
+        Returns:
+            ApiResponse:
+                which contain id of request or error if was occurred during
+                operation.
+        Raises:
+            ValueError:
+                is raised if given time is not valid.
+        """
+        if not self.__validate_time(send_time):
+            raise ValueError("Invalid time.")
+
+        signature = self.__generate_signature(
+            self.__integration_code, self.recipients)
+        response = self.__send_scheduled_message(message, send_time,
+                                                 self.recipients, signature)
+        if response.success:
+            response.data = str(response.data)
+        return response
 
     def get_credit(self) -> ApiResponse:
         """
@@ -353,8 +379,8 @@ class Client(object):
         finally:
             return response
 
-    def __scheduled_message(self, msg: str, time: str,
-                            rcpt: str, sign: str) -> ApiResponse:
+    def __send_scheduled_message(self, msg: str, time: str,
+                                 rcpt: str, sign: str) -> ApiResponse:
         # sender -> str
         # rcpt -> str
         # msg -> str
@@ -371,3 +397,13 @@ class Client(object):
             response.data = result
         finally:
             return response
+
+    @staticmethod
+    def __validate_time(send_time):
+        date_format = "%Y-%m-%d %H:%M"
+        try:
+            datetime.datetime.strptime(send_time, date_format)
+        except ValueError:
+            return False
+        else:
+            return True
