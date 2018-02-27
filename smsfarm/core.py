@@ -9,7 +9,18 @@ WSDL_URL = "http://app.smsfarm.sk/api/?wsdl"
 
 class ApiResponse(object):
     """
-    TODO add description
+    Representation of result SOAP operation.
+
+    ApiResponse contain two attributes. The **data** attribute contain result of
+    performed SOAP operation. The **error** attribute is empty if operation was
+    performed with success. The data attribute is mostly empty in case error.
+
+    Attributes:
+        data:
+            Result of SOAP operation.
+        error:
+            Contain error message, if is error occurred during
+            SOAP operation.
     """
     def __init__(self):
         self.data = None
@@ -17,12 +28,26 @@ class ApiResponse(object):
 
     @property
     def success(self):
+        """
+        this property is used for check if SOAP operation was success.
+
+        Returns:
+            True -  if SOAP operation was success.
+            False - if during SOAP operation was occurred error.
+        """
         if self.error:
             return False
         return True
 
     @property
     def failed(self):
+        """
+        this property is used for check if SOAP operation was failed.
+
+        Returns:
+            True -  if SOAP operation was failed.
+            False - if SOAP operation was successful.
+        """
         if self.error:
             return True
         return False
@@ -30,17 +55,20 @@ class ApiResponse(object):
 
 class Client(object):
     """
-    TODO add description
+    Implementation of Client class.
     """
     def __init__(self, integration_code, integration_id, sender=None):
         """
         Implementation of API client for smsfarm.sk.
 
         Args:
-            integration_code: Integration code provided by smsfarm.sk.
-            integration_id: Integration id provided by smsfarm.sk.
-            sender: String representation of sender name or number. By default
-                    is used a hostname of machine.
+            integration_code:
+                Integration code provided by smsfarm.sk.
+            integration_id:
+                Integration id provided by smsfarm.sk.
+            sender:
+                String representation of sender name or number. By default
+                is used a hostname of machine.
         """
         self.__recipients = []
         self.__integration_code = integration_code
@@ -62,6 +90,15 @@ class Client(object):
 
     @property
     def sender(self):
+        """
+        Attribute which contain client name.
+
+        If was not specified during class initialization then is implicit
+        set to hostname of machine.
+
+        Returns:
+            String representation of sender name or number.
+        """
         return self.__sender
 
     @property
@@ -83,11 +120,13 @@ class Client(object):
         Does not any validation if given telephone number is valid or not.
 
         Args:
-            recipients: Recipients for whom message will be send. Possible
-                value is instance of str or list of strings. For example:
+            recipients:
+                Recipients for whom message will be send. Possible value
+                is instance of str or list of strings. For example:
                 "+421900123456" or ["+421900654321"].
         Raises:
-            ValueError: if recipients argument is not type of list or string.
+            ValueError:
+                is raised if recipients argument is not type of list or string.
         """
         if isinstance(recipients, str):
             self.__recipients.append(recipients)
@@ -101,12 +140,15 @@ class Client(object):
         Send message to the recipients.
 
         Args:
-            message: Content of message which you want to send.
-
+            message:
+                String content of message which you want to send.
         Returns:
-            ApiResponse: which contain id of request.
+            ApiResponse:
+                which contain id of request or error if was occurred during
+                operation.
         Raises:
-            ValueError: An error when is given empty message.
+            ValueError:
+                An error when is given empty string.
         """
 
         if not message:
@@ -126,12 +168,13 @@ class Client(object):
         Get message delivery status.
 
         Args:
-            request_id: id of message request returned by send_message
-                method.
-            recipient: number of recipient of the message.
-
+            request_id:
+                id of message request returned by send_message method.
+            recipient:
+                number of recipient of the message.
         Returns:
-            ApiResponse: response contain delivery status for given recipient.
+            ApiResponse:
+                response contain delivery status for given recipient.
 
                 Possible delivery status:
                     QUEUED
@@ -156,10 +199,11 @@ class Client(object):
                         destination country is forbidden
                     SENDING-FAILED
                         unknown error while sending
-
         Raises:
-            ValueError: recipient was not explicit specified and during
-                initialization was used a list of recipients.
+            ValueError:
+                if recipient was not explicit specified and during
+                initialization was used a list of recipients with at least
+                two recipients.
         """
         if not recipient:
             if len(self.__recipients) == 1:
@@ -184,7 +228,8 @@ class Client(object):
         Get amount of credit.
 
         Returns:
-            ApiResponse: which contain amount of remaining credit.
+            ApiResponse:
+                which contain amount of remaining credit.
         """
         signature = self.__generate_signature(self.__integration_code,
                                               self.__integration_id)
@@ -195,13 +240,14 @@ class Client(object):
         Get status for all send messages.
 
         Args:
-            request_id: id of message request returned by send_message
-                method.
+            request_id:
+                id of message request returned by send_message method.
 
         Returns:
-            ApiResponse: A dict mapping keys to the corresponding list
-                returned by SOAP service. Each key is recipient number
-                and each value is delivery status.
+            ApiResponse:
+                A dict mapping keys to the corresponding list returned by
+                SOAP service. Each key is recipient number and each value
+                is delivery status.
 
                 Possible delivery status:
                     QUEUED
