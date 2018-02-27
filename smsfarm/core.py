@@ -219,33 +219,32 @@ class Client(object):
         response = self.__get_message_status(request_id, recipient, signature)
         return response
 
-    def send_scheduled_message(self, message: str, send_time: str,
-                               recipient=None) -> ApiResponse:
+    def send_scheduled_message(self, message: str,
+                               send_time: str) -> ApiResponse:
         """
+        Send message at specified time.
 
         Args:
             message:
+                String content of message which you want to send.
             send_time:
-            recipient:
-
+                String representation of specified time. Must be in
+                "%Y-%m-%d %H:%M" format, for example (2018-01-01 12:29).
         Returns:
             ApiResponse:
+                which contain id of request or error if was occurred during
+                operation.
         Raises:
-
+            ValueError:
+                is raised if given time is not valid.
         """
-        if not recipient:
-            if len(self.__recipients) == 1:
-                recipient = self.__recipients[0]
-            else:
-                raise ValueError("Please specify recipient.")
-
         if not self.__validate_time(send_time):
             raise ValueError("Invalid time.")
 
         signature = self.__generate_signature(
-            self.__integration_code, recipient)
-        response = self.__send_scheduled_message(message, send_time, recipient,
-                                                 signature)
+            self.__integration_code, self.recipients)
+        response = self.__send_scheduled_message(message, send_time,
+                                                 self.recipients, signature)
         if response.success:
             response.data = str(response.data)
         return response
