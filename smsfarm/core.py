@@ -12,9 +12,10 @@ class ApiResponse(object):
     """
     Representation of result SOAP operation.
 
-    ApiResponse contain two attributes. The **data** attribute contain result of
-    performed SOAP operation. The **error** attribute is empty if operation was
-    performed with success. The data attribute is mostly empty in case error.
+    ApiResponse contain two attributes. The **data** attribute contain result
+    of performed SOAP operation. The **error** attribute is empty if operation
+    was performed with success. The data attribute is mostly empty in case
+    error.
 
     Attributes:
         data:
@@ -85,7 +86,7 @@ class Client(object):
     @staticmethod
     def __generate_signature(first, second) -> str:
         if not first or not second:
-            raise ValueError("Both arguments are required and cannot be empty!")
+            raise ValueError("Both arguments are required and cannot be empty")
         raw_string = (first + second).encode()
         md5_sum = hashlib.md5(raw_string).hexdigest()
         signature = md5_sum[10:21]

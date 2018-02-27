@@ -16,9 +16,9 @@ requirements = parse_requirements('requirements.txt', session=PipSession())
 
 for item in requirements:
     # we want to handle package names and also repo urls
-    if getattr(item, 'url', None):  # older pip has url
+    if getattr(item, 'url', None):
         links.append(str(item.url))
-    if getattr(item, 'link', None): # newer pip has link
+    if getattr(item, 'link', None):
         links.append(str(item.link))
     if item.req:
         requires.append(str(item.req))
@@ -50,4 +50,3 @@ setup(
     dependency_links=links,
     zip_safe=False,
 )
-
