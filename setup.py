@@ -6,12 +6,6 @@ from setuptools import setup, find_packages
 links = []
 requires = []
 
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except (IOError, ImportError):
-    long_description = "Python client for smsfarm.sk"
-
 requirements = parse_requirements('requirements.txt', session=PipSession())
 
 for item in requirements:
@@ -32,7 +26,7 @@ setup(
     author='Jozef "sunny" Mak',
     author_email='sunny@jozefmak.eu',
     description='Python client for smsfarm.sk',
-    long_description=long_description,
+    long_description="Python client for smsfarm.sk",
     install_requires=requires,
     keywords=[
         'smsfarm',
