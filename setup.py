@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='smsfarm',
-    version='0.1.0',
+    version='0.1.1',
     packages=['smsfarm'],
     url='https://github.com/j-mak/smsfarm',
     license="MIT License",
