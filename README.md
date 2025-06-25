@@ -33,7 +33,7 @@ client.recipients = '+421900123456'
 
 result = client.send_message("Hello World!")
 if result.success:
-    # message was sended without any error
+    # message was sent without any error
     print(result.data) 
     delivery_status = client.get_message_status(result.data)
     if delivery_status.success:
