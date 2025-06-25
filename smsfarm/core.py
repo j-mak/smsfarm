@@ -121,7 +121,8 @@ class Client(object):
         """
         Setter for property recipients.
 
-        Does not any validation if given telephone number is valid or not.
+        This method performs no validation to check whether the given
+        telephone number is valid.
 
         Args:
             recipients:
